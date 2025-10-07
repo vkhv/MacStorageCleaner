@@ -17,19 +17,26 @@ struct ContentView: View {
                     }
                     .tag(0)
                 
+                CleanupView(analyzer: analyzer)
+                    .tabItem {
+                        Image(systemName: "trash.circle")
+                        Text("Очистка")
+                    }
+                    .tag(1)
+                
                 DirectoryView(analyzer: analyzer)
                     .tabItem {
                         Image(systemName: "folder")
                         Text("Директории")
                     }
-                    .tag(1)
+                    .tag(2)
                 
                 LogsView(analyzer: analyzer)
                     .tabItem {
                         Image(systemName: "doc.text")
                         Text("Логи")
                     }
-                    .tag(2)
+                    .tag(3)
             }
         }
         .frame(minWidth: 1000, minHeight: 700)

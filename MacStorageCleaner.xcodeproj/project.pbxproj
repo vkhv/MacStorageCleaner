@@ -13,17 +13,21 @@
 		A1234567890123456789013A /* StorageModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789013B /* StorageModel.swift */; };
 		A1234567890123456789013C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789013D /* Assets.xcassets */; };
 		A1234567890123456789013E /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789013F /* Preview Assets.xcassets */; };
+		F510C7132E95B82300A9ADA9 /* CleanupRecommendations.swift in Sources */ = {isa = PBXBuildFile; fileRef = F510C7112E95B82300A9ADA9 /* CleanupRecommendations.swift */; };
+		F510C7142E95B82300A9ADA9 /* CleanupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F510C7122E95B82300A9ADA9 /* CleanupView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		A1234567890123456789012G /* MacStorageCleaner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacStorageCleaner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1234567890123456789012B /* MacStorageCleanerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacStorageCleanerApp.swift; sourceTree = "<group>"; };
 		A1234567890123456789012D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A1234567890123456789012F /* StorageAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageAnalyzer.swift; sourceTree = "<group>"; };
+		A1234567890123456789012G /* MacStorageCleaner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacStorageCleaner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1234567890123456789013B /* StorageModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageModel.swift; sourceTree = "<group>"; };
 		A1234567890123456789013D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A1234567890123456789013F /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		A1234567890123456789014A /* MacStorageCleaner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MacStorageCleaner.entitlements; sourceTree = "<group>"; };
+		F510C7112E95B82300A9ADA9 /* CleanupRecommendations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleanupRecommendations.swift; sourceTree = "<group>"; };
+		F510C7122E95B82300A9ADA9 /* CleanupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleanupView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,6 +66,8 @@
 		A1234567890123456789014E = {
 			isa = PBXGroup;
 			children = (
+				F510C7112E95B82300A9ADA9 /* CleanupRecommendations.swift */,
+				F510C7122E95B82300A9ADA9 /* CleanupView.swift */,
 				A1234567890123456789014C /* MacStorageCleaner */,
 				A1234567890123456789014F /* Products */,
 			);
@@ -149,6 +155,8 @@
 				A1234567890123456789012E /* StorageAnalyzer.swift in Sources */,
 				A1234567890123456789013A /* StorageModel.swift in Sources */,
 				A1234567890123456789012A /* MacStorageCleanerApp.swift in Sources */,
+				F510C7132E95B82300A9ADA9 /* CleanupRecommendations.swift in Sources */,
+				F510C7142E95B82300A9ADA9 /* CleanupView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

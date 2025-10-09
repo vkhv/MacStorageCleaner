@@ -352,4 +352,125 @@ class StorageAnalyzer: ObservableObject {
         try fileManager.removeItem(atPath: path)
         analysisState.addLog("🗑️ Удалена директория: \(path)")
     }
+    
+    // MARK: - Volume Analysis
+    
+    func scanVolumes() async {
+        analysisState.isAnalyzingVolumes = true
+        analysisState.addLog("🔍 Сканируем подключенные тома...")
+        
+        do {
+            let volumes = try await getAvailableVolumes()
+            analysisState.volumes = volumes
+            analysisState.addLog("✅ Найдено томов: \(volumes.count)")
+            
+            for volume in volumes {
+                analysisState.addLog("💾 \(volume.name): \(volume.formattedTotalSize) (\(volume.formattedUsedSize) используется)")
+            }
+        } catch {
+            analysisState.addLog("❌ Ошибка сканирования томов: \(error.localizedDescription)")
+        }
+        
+        analysisState.isAnalyzingVolumes = false
+    }
+    
+    func analyzeVolume(_ volume: VolumeInfo) async {
+        analysisState.isAnalyzingVolumes = true
+        analysisState.addLog("📊 Начинаем анализ тома: \(volume.name)")
+        
+        let volumePath = volume.path
+        var directories: [DirectoryInfo] = []
+        
+        // Основные директории для анализа на внешних томах
+        let dirsToAnalyze = [
+            "\(volumePath)/Library",
+            "\(volumePath)/Applications",
+            "\(volumePath)/Users",
+            "\(volumePath)/Documents",
+            "\(volumePath)/Downloads",
+            "\(volumePath)/Pictures",
+            "\(volumePath)/Movies",
+            "\(volumePath)/Music"
+        ]
+        
+        for dir in dirsToAnalyze {
+            guard fileManager.fileExists(atPath: dir) else { continue }
+            
+            analysisState.addLog("📁 Анализируем: \(dir)")
+            
+            do {
+                if let dirInfo = try await analyzeDirectory(at: dir, depth: 0, maxDepth: 3) {
+                    directories.append(dirInfo)
+                    analysisState.addLog("✅ \(dir): \(dirInfo.formattedSize)")
+                }
+            } catch {
+                analysisState.addLog("⚠️ Ошибка анализа \(dir): \(error.localizedDescription)")
+            }
+        }
+        
+        // Обновляем информацию о томе
+        if let index = analysisState.volumes.firstIndex(where: { $0.id == volume.id }) {
+            var updatedVolume = volume
+            updatedVolume.directories = directories
+            analysisState.volumes[index] = updatedVolume
+        }
+        
+        analysisState.addLog("✅ Анализ тома \(volume.name) завершен")
+        analysisState.isAnalyzingVolumes = false
+    }
+    
+    private func getAvailableVolumes() async throws -> [VolumeInfo] {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.global(qos: .utility).async {
+                var volumes: [VolumeInfo] = []
+                
+                guard let volumeURLs = FileManager.default.mountedVolumeURLs(
+                    includingResourceValuesForKeys: [.volumeNameKey, .volumeTotalCapacityKey, .volumeAvailableCapacityKey, .volumeIsRemovableKey],
+                    options: [.skipHiddenVolumes]
+                ) else {
+                    continuation.resume(returning: volumes)
+                    return
+                }
+                
+                for volumeURL in volumeURLs {
+                    do {
+                        let resourceValues = try volumeURL.resourceValues(forKeys: [
+                            .volumeNameKey,
+                            .volumeTotalCapacityKey,
+                            .volumeAvailableCapacityKey,
+                            .volumeIsRemovableKey
+                        ])
+                        
+                        let name = resourceValues.volumeName ?? volumeURL.lastPathComponent
+                        let totalSize = Int64(resourceValues.volumeTotalCapacity ?? 0)
+                        let freeSize = Int64(resourceValues.volumeAvailableCapacity ?? 0)
+                        let usedSize = totalSize - freeSize
+                        let isRemovable = resourceValues.volumeIsRemovable ?? false
+                        
+                        // Пропускаем основной системный том (он уже анализируется в startAnalysis)
+                        let path = volumeURL.path
+                        if path == "/" || path.isEmpty {
+                            continue
+                        }
+                        
+                        let volume = VolumeInfo(
+                            path: path,
+                            name: name,
+                            totalSize: totalSize,
+                            usedSize: usedSize,
+                            freeSize: freeSize,
+                            isRemovable: isRemovable,
+                            directories: []
+                        )
+                        
+                        volumes.append(volume)
+                    } catch {
+                        print("⚠️ Ошибка получения информации о томе \(volumeURL.path): \(error)")
+                    }
+                }
+                
+                continuation.resume(returning: volumes)
+            }
+        }
+    }
 }

@@ -11,3 +11,4 @@ struct MacStorageCleanerApp: App {
         .windowToolbarStyle(.unified)
     }
 }
+

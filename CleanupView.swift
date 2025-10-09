@@ -108,6 +108,7 @@ struct DirectoryDetailCard: View {
     let index: Int
     let isExpanded: Bool
     let onToggle: () -> Void
+    @State private var showingDetailedAnalysis = false
     
     var recommendations: [CleanupRecommendation] {
         CleanupAnalyzer.analyzeDirectory(directory)
@@ -115,6 +116,16 @@ struct DirectoryDetailCard: View {
     
     var mainRecommendation: CleanupRecommendation? {
         recommendations.first
+    }
+    
+    var isSystemFolder: Bool {
+        let path = directory.path.lowercased()
+        return path == "/library" || 
+               path.contains("/library/") || 
+               path.hasPrefix("/private/var") || 
+               path.hasPrefix("/usr") ||
+               path.hasPrefix("/system") ||
+               path.hasPrefix("/opt")
     }
     
     var body: some View {
@@ -180,12 +191,33 @@ struct DirectoryDetailCard: View {
             // Expanded content
             if isExpanded {
                 VStack(alignment: .leading, spacing: 12) {
-                    // Statistics
+                    // Statistics and System Analysis Button
                     HStack(spacing: 20) {
                         StatItem(icon: "doc.text.fill", title: "Файлов", value: "\(directory.fileCount)")
                         
                         if let lastModified = directory.lastModified {
                             StatItem(icon: "clock.fill", title: "Изменено", value: formatRelativeDate(lastModified))
+                        }
+                        
+                        Spacer()
+                        
+                        // System Analysis Button for system folders
+                        if isSystemFolder {
+                            Button(action: {
+                                showingDetailedAnalysis = true
+                            }) {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "chart.bar.doc.horizontal")
+                                    Text("Детальный анализ")
+                                }
+                                .font(.caption)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(Color.purple.opacity(0.1))
+                                .foregroundColor(.purple)
+                                .cornerRadius(6)
+                            }
+                            .buttonStyle(PlainButtonStyle())
                         }
                     }
                     .padding(.horizontal)
@@ -339,6 +371,9 @@ struct DirectoryDetailCard: View {
             }
         }
         .animation(.easeInOut(duration: 0.2), value: isExpanded)
+        .sheet(isPresented: $showingDetailedAnalysis) {
+            SystemAnalysisView(directory: directory)
+        }
     }
     
     var rankColor: Color {

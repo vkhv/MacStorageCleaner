@@ -15,6 +15,8 @@
 		A1234567890123456789013E /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789013F /* Preview Assets.xcassets */; };
 		F510C7132E95B82300A9ADA9 /* CleanupRecommendations.swift in Sources */ = {isa = PBXBuildFile; fileRef = F510C7112E95B82300A9ADA9 /* CleanupRecommendations.swift */; };
 		F510C7142E95B82300A9ADA9 /* CleanupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F510C7122E95B82300A9ADA9 /* CleanupView.swift */; };
+		F510C7172E95C01F00A9ADA9 /* SystemAnalysisView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F510C7152E95C01F00A9ADA9 /* SystemAnalysisView.swift */; };
+		F510C7182E95C01F00A9ADA9 /* SystemFolderAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F510C7162E95C01F00A9ADA9 /* SystemFolderAnalyzer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +30,8 @@
 		A1234567890123456789014A /* MacStorageCleaner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MacStorageCleaner.entitlements; sourceTree = "<group>"; };
 		F510C7112E95B82300A9ADA9 /* CleanupRecommendations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleanupRecommendations.swift; sourceTree = "<group>"; };
 		F510C7122E95B82300A9ADA9 /* CleanupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleanupView.swift; sourceTree = "<group>"; };
+		F510C7152E95C01F00A9ADA9 /* SystemAnalysisView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemAnalysisView.swift; sourceTree = "<group>"; };
+		F510C7162E95C01F00A9ADA9 /* SystemFolderAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemFolderAnalyzer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,6 +70,8 @@
 		A1234567890123456789014E = {
 			isa = PBXGroup;
 			children = (
+				F510C7152E95C01F00A9ADA9 /* SystemAnalysisView.swift */,
+				F510C7162E95C01F00A9ADA9 /* SystemFolderAnalyzer.swift */,
 				F510C7112E95B82300A9ADA9 /* CleanupRecommendations.swift */,
 				F510C7122E95B82300A9ADA9 /* CleanupView.swift */,
 				A1234567890123456789014C /* MacStorageCleaner */,
@@ -157,6 +163,8 @@
 				A1234567890123456789012A /* MacStorageCleanerApp.swift in Sources */,
 				F510C7132E95B82300A9ADA9 /* CleanupRecommendations.swift in Sources */,
 				F510C7142E95B82300A9ADA9 /* CleanupView.swift in Sources */,
+				F510C7172E95C01F00A9ADA9 /* SystemAnalysisView.swift in Sources */,
+				F510C7182E95C01F00A9ADA9 /* SystemFolderAnalyzer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

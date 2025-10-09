@@ -109,6 +109,8 @@ struct DirectoryDetailCard: View {
     let isExpanded: Bool
     let onToggle: () -> Void
     
+    @State private var showingSystemAnalysis = false
+    
     var recommendations: [CleanupRecommendation] {
         CleanupAnalyzer.analyzeDirectory(directory)
     }
@@ -287,6 +289,31 @@ struct DirectoryDetailCard: View {
                             }
                         }
                     }
+                    
+                    // Action buttons
+                    HStack(spacing: 12) {
+                        Button(action: {
+                            showingSystemAnalysis = true
+                        }) {
+                            Label("Детальный анализ", systemImage: "chart.bar.doc.horizontal")
+                                .font(.caption)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        
+                        Button(action: {
+                            NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: directory.path)
+                        }) {
+                            Label("Открыть в Finder", systemImage: "folder")
+                                .font(.caption)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                        }
+                        .buttonStyle(.bordered)
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 8)
                 }
                 .padding(.bottom, 12)
                 .background(Color(NSColor.controlBackgroundColor).opacity(0.3))
@@ -295,6 +322,9 @@ struct DirectoryDetailCard: View {
             }
         }
         .animation(.easeInOut(duration: 0.2), value: isExpanded)
+        .sheet(isPresented: $showingSystemAnalysis) {
+            SystemAnalysisView(directory: directory)
+        }
     }
     
     var rankColor: Color {
@@ -353,4 +383,6 @@ struct StatItem: View {
         }
     }
 }
+
+
 

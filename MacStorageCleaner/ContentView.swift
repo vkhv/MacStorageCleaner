@@ -37,6 +37,13 @@ struct ContentView: View {
                         Text("Логи")
                     }
                     .tag(3)
+                
+                VolumesView(analyzer: analyzer)
+                    .tabItem {
+                        Image(systemName: "externaldrive")
+                        Text("Тома")
+                    }
+                    .tag(4)
             }
         }
         .frame(minWidth: 1000, minHeight: 700)
@@ -379,6 +386,265 @@ struct LogsView: View {
             Spacer()
         }
         .padding()
+    }
+}
+
+struct VolumesView: View {
+    @ObservedObject var analyzer: StorageAnalyzer
+    @State private var selectedVolume: VolumeInfo?
+    @State private var showingSystemAnalysis = false
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            HStack {
+                Text("Подключенные тома")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                
+                Spacer()
+                
+                Button(analyzer.analysisState.isAnalyzingVolumes ? "Сканирование..." : "Сканировать тома") {
+                    Task {
+                        await analyzer.scanVolumes()
+                    }
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(analyzer.analysisState.isAnalyzingVolumes)
+            }
+            
+            if analyzer.analysisState.volumes.isEmpty {
+                VStack(spacing: 12) {
+                    Image(systemName: "externaldrive")
+                        .font(.system(size: 48))
+                        .foregroundColor(.secondary)
+                    Text("Подключенные тома не найдены")
+                        .foregroundColor(.secondary)
+                    Text("Нажмите 'Сканировать тома' для поиска")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                ScrollView {
+                    VStack(spacing: 16) {
+                        ForEach(analyzer.analysisState.volumes) { volume in
+                            VolumeCard(volume: volume, analyzer: analyzer, selectedVolume: $selectedVolume)
+                        }
+                    }
+                    .padding()
+                }
+            }
+            
+            Spacer()
+        }
+        .padding()
+        .sheet(item: $selectedVolume) { volume in
+            VolumeDetailView(volume: volume, analyzer: analyzer)
+        }
+    }
+}
+
+struct VolumeCard: View {
+    let volume: VolumeInfo
+    @ObservedObject var analyzer: StorageAnalyzer
+    @Binding var selectedVolume: VolumeInfo?
+    @State private var isAnalyzing = false
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Image(systemName: volume.isRemovable ? "externaldrive.fill" : "internaldrive.fill")
+                    .font(.title2)
+                    .foregroundColor(volume.isRemovable ? .blue : .purple)
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(volume.name)
+                        .font(.headline)
+                    Text(volume.path)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                
+                Spacer()
+                
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text(volume.formattedUsedSize)
+                        .font(.headline)
+                    Text("из \(volume.formattedTotalSize)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+            
+            // Progress bar
+            GeometryReader { geometry in
+                ZStack(alignment: .leading) {
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.2))
+                        .frame(height: 8)
+                        .cornerRadius(4)
+                    
+                    Rectangle()
+                        .fill(usageColor(for: volume.usedPercent))
+                        .frame(width: geometry.size.width * CGFloat(volume.usedPercent / 100), height: 8)
+                        .cornerRadius(4)
+                }
+            }
+            .frame(height: 8)
+            
+            HStack {
+                Text("\(Int(volume.usedPercent))% использовано")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                
+                Spacer()
+                
+                if !volume.directories.isEmpty {
+                    Text("\(volume.directories.count) директорий проанализировано")
+                        .font(.caption)
+                        .foregroundColor(.green)
+                }
+            }
+            
+            HStack(spacing: 12) {
+                Button(isAnalyzing ? "Анализируем..." : "Анализировать") {
+                    Task {
+                        isAnalyzing = true
+                        await analyzer.analyzeVolume(volume)
+                        isAnalyzing = false
+                    }
+                }
+                .buttonStyle(.bordered)
+                .disabled(isAnalyzing)
+                
+                if !volume.directories.isEmpty {
+                    Button("Детали") {
+                        selectedVolume = volume
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+                
+                Button("Открыть в Finder") {
+                    NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: volume.path)
+                }
+                .buttonStyle(.bordered)
+            }
+        }
+        .padding()
+        .background(Color.gray.opacity(0.1))
+        .cornerRadius(12)
+    }
+    
+    private func usageColor(for percent: Double) -> Color {
+        if percent < 70 {
+            return .green
+        } else if percent < 85 {
+            return .orange
+        } else {
+            return .red
+        }
+    }
+}
+
+struct VolumeDetailView: View {
+    let volume: VolumeInfo
+    @ObservedObject var analyzer: StorageAnalyzer
+    @Environment(\.dismiss) private var dismiss
+    @State private var selectedDirectory: DirectoryInfo?
+    @State private var showingSystemAnalysis = false
+    
+    var body: some View {
+        NavigationView {
+            VStack(alignment: .leading, spacing: 16) {
+                // Header
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(volume.name)
+                            .font(.title)
+                            .fontWeight(.bold)
+                        Text(volume.path)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    Spacer()
+                    
+                    VStack(alignment: .trailing, spacing: 4) {
+                        Text(volume.formattedUsedSize)
+                            .font(.title2)
+                            .fontWeight(.bold)
+                        Text("из \(volume.formattedTotalSize)")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .padding()
+                
+                Divider()
+                
+                // Directories list
+                if volume.directories.isEmpty {
+                    VStack(spacing: 12) {
+                        Text("Директории не проанализированы")
+                            .foregroundColor(.secondary)
+                        Text("Нажмите 'Анализировать' на карточке тома")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    List {
+                        ForEach(volume.directories.sorted { $0.size > $1.size }) { directory in
+                            Button(action: {
+                                selectedDirectory = directory
+                                showingSystemAnalysis = true
+                            }) {
+                                HStack {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text(directory.displayName)
+                                            .fontWeight(.medium)
+                                        Text(directory.path)
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                    
+                                    Spacer()
+                                    
+                                    VStack(alignment: .trailing, spacing: 4) {
+                                        Text(directory.formattedSize)
+                                            .fontWeight(.medium)
+                                        Text("\(directory.fileCount) файлов")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                    
+                                    Image(systemName: "chevron.right")
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .listStyle(.plain)
+                }
+                
+                Spacer()
+            }
+            .navigationTitle(volume.name)
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button("Закрыть") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+        .frame(minWidth: 800, minHeight: 600)
+        .sheet(isPresented: $showingSystemAnalysis) {
+            if let directory = selectedDirectory {
+                SystemAnalysisView(directory: directory)
+            }
+        }
     }
 }
 
